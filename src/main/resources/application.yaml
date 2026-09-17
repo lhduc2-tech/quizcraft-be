@@ -1,3 +1,10 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: quiz-service
+
+gemini:
+  model: gemini-3.6-flash
+  api-key: ${API_KEY:}
