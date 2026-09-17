@@ -20,6 +20,9 @@ public class QuizHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "deck_title", nullable = false)
     private String deckTitle;
 

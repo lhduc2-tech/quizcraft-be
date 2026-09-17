@@ -24,10 +24,11 @@ public class QuizHistoryService {
     }
 
     @Transactional
-    public QuizHistory saveHistory(QuizHistoryRequest request) {
-        log.info("Saving quiz history for deck: {}, score: {}%", request.getDeckTitle(), request.getScorePercentage());
+    public QuizHistory saveHistory(QuizHistoryRequest request, Long userId) {
+        log.info("Saving quiz history for userId: {}, deck: {}, score: {}%", userId, request.getDeckTitle(), request.getScorePercentage());
 
         QuizHistory entity = QuizHistory.builder()
+                .userId(userId)
                 .deckTitle(request.getDeckTitle())
                 .difficulty(request.getDifficulty())
                 .playMode(request.getPlayMode())
@@ -45,17 +46,33 @@ public class QuizHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<QuizHistory> getAllHistory() {
+    public List<QuizHistory> getAllHistory(Long userId) {
+        if (userId != null) {
+            return historyRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        }
         return historyRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @Transactional(readOnly = true)
-    public Optional<QuizHistory> getHistoryById(Long id) {
+    public Optional<QuizHistory> getHistoryById(Long id, Long userId) {
+        if (userId != null) {
+            return historyRepository.findByIdAndUserId(id, userId);
+        }
         return historyRepository.findById(id);
     }
 
     @Transactional
-    public boolean deleteHistory(Long id) {
+    public boolean deleteHistory(Long id, Long userId) {
+        if (userId != null) {
+            Optional<QuizHistory> record = historyRepository.findByIdAndUserId(id, userId);
+            if (record.isPresent()) {
+                historyRepository.delete(record.get());
+                log.info("Deleted quiz history id {} for userId {}", id, userId);
+                return true;
+            }
+            return false;
+        }
+
         if (historyRepository.existsById(id)) {
             historyRepository.deleteById(id);
             log.info("Deleted quiz history with id: {}", id);
@@ -65,8 +82,13 @@ public class QuizHistoryService {
     }
 
     @Transactional
-    public void clearAllHistory() {
-        historyRepository.deleteAll();
-        log.info("Cleared all quiz history records.");
+    public void clearAllHistory(Long userId) {
+        if (userId != null) {
+            historyRepository.deleteAllByUserId(userId);
+            log.info("Cleared all quiz history records for userId: {}", userId);
+        } else {
+            historyRepository.deleteAll();
+            log.info("Cleared all quiz history records.");
+        }
     }
 }

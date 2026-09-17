@@ -2,12 +2,14 @@ package com.quizcraft.quiz_service.controller;
 
 import com.quizcraft.quiz_service.dto.QuizHistoryRequest;
 import com.quizcraft.quiz_service.entity.QuizHistory;
+import com.quizcraft.quiz_service.security.UserPrincipal;
 import com.quizcraft.quiz_service.service.QuizHistoryService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +28,11 @@ public class QuizHistoryController {
     }
 
     @PostMapping
-    public ResponseEntity<?> saveHistory(@Valid @RequestBody QuizHistoryRequest request) {
+    public ResponseEntity<?> saveHistory(@Valid @RequestBody QuizHistoryRequest request,
+                                         @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            QuizHistory saved = historyService.saveHistory(request);
+            Long userId = principal != null ? principal.getId() : null;
+            QuizHistory saved = historyService.saveHistory(request, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (Exception e) {
             log.error("Failed to save quiz history: {}", e.getMessage(), e);
@@ -40,20 +44,25 @@ public class QuizHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<QuizHistory>> getAllHistory() {
-        return ResponseEntity.ok(historyService.getAllHistory());
+    public ResponseEntity<List<QuizHistory>> getAllHistory(@AuthenticationPrincipal UserPrincipal principal) {
+        Long userId = principal != null ? principal.getId() : null;
+        return ResponseEntity.ok(historyService.getAllHistory(userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getHistoryById(@PathVariable Long id) {
-        return historyService.getHistoryById(id)
+    public ResponseEntity<?> getHistoryById(@PathVariable Long id,
+                                            @AuthenticationPrincipal UserPrincipal principal) {
+        Long userId = principal != null ? principal.getId() : null;
+        return historyService.getHistoryById(id, userId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteHistory(@PathVariable Long id) {
-        boolean deleted = historyService.deleteHistory(id);
+    public ResponseEntity<?> deleteHistory(@PathVariable Long id,
+                                           @AuthenticationPrincipal UserPrincipal principal) {
+        Long userId = principal != null ? principal.getId() : null;
+        boolean deleted = historyService.deleteHistory(id, userId);
         if (deleted) {
             return ResponseEntity.ok(Map.of("message", "Đã xóa bản ghi lịch sử", "id", id));
         }
@@ -61,8 +70,9 @@ public class QuizHistoryController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> clearAllHistory() {
-        historyService.clearAllHistory();
+    public ResponseEntity<?> clearAllHistory(@AuthenticationPrincipal UserPrincipal principal) {
+        Long userId = principal != null ? principal.getId() : null;
+        historyService.clearAllHistory(userId);
         return ResponseEntity.ok(Map.of("message", "Đã xóa toàn bộ lịch sử bài làm"));
     }
 }

@@ -10,4 +10,12 @@ import java.util.List;
 public interface QuizHistoryRepository extends JpaRepository<QuizHistory, Long> {
 
     List<QuizHistory> findAllByOrderByCreatedAtDesc();
+
+    List<QuizHistory> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    java.util.Optional<QuizHistory> findByIdAndUserId(Long id, Long userId);
+
+    void deleteAllByUserId(Long userId);
+
+    long countByUserId(Long userId);
 }
