@@ -16,4 +16,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(false)
                 .maxAge(3600);
     }
+
+    @org.springframework.context.annotation.Bean
+    public org.springframework.web.filter.CharacterEncodingFilter characterEncodingFilter() {
+        org.springframework.web.filter.CharacterEncodingFilter filter = new org.springframework.web.filter.CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
+        return filter;
+    }
 }

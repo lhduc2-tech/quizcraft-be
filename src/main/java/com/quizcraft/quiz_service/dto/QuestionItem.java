@@ -16,5 +16,6 @@ public class QuestionItem {
     private List<String> options;
     private Integer correctIndex;
     private String explanation;
+    private List<String> optionExplanations;
     private String memoryHook;
 }

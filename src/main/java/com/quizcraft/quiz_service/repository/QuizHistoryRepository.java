@@ -1,0 +1,13 @@
+package com.quizcraft.quiz_service.repository;
+
+import com.quizcraft.quiz_service.entity.QuizHistory;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface QuizHistoryRepository extends JpaRepository<QuizHistory, Long> {
+
+    List<QuizHistory> findAllByOrderByCreatedAtDesc();
+}

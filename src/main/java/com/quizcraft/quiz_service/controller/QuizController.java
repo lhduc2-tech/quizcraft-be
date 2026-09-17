@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/quiz")
+@RequestMapping(value = "/api/quiz", produces = "application/json;charset=UTF-8")
 public class QuizController {
 
     private static final Logger log = LoggerFactory.getLogger(QuizController.class);

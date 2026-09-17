@@ -64,7 +64,8 @@ public class GeminiService {
                 YÊU CẦU ĐẶC BIỆT VỀ CHẤT LƯỢNG SƯ PHẠM:
                 - Câu hỏi cần gợi mở tư duy, kiểm tra xem người học có hiểu nguyên lý bản chất hay không (không chỉ hỏi vẹt câu chữ).
                 - Có đúng 4 phương án trắc nghiệm ngắn gọn, rõ ràng.
-                - Phần "explanation": Giải thích cặn kẽ vì sao phương án được chọn là đúng và các phương án kia chưa chuẩn.
+                - Phần "explanation": Giải thích cặn kẽ vì sao phương án đúng là chuẩn xác nhất.
+                - Phần "optionExplanations": Mảng gồm đúng 4 chuỗi tương ứng với 4 phương án (index 0, 1, 2, 3). Nếu là phương án đúng, hãy nêu tóm tắt điểm đúng. Nếu là phương án sai, HÃY GIẢI THÍCH RÕ RÀNG VÌ SAO PHƯƠNG ÁN ĐÓ LẠI SAI (chỉ ra bẫy tư duy, hiểu lầm phổ biến, hoặc sự nhầm lẫn bản chất) để người học khi chọn sai sẽ hiểu ngay lý do tại sao phương án họ chọn là sai.
                 - Phần "memoryHook": Một mẹo ghi nhớ ngắn hoặc câu ẩn dụ dân dã (1-2 câu) giúp nhớ mãi kiến thức này.
                 - Phần "topic": Đặt tên tiêu đề bài học trang nhã, dưới 6 từ.
 
@@ -193,6 +194,7 @@ public class GeminiService {
         questionItemProps.put("options", Map.of("type", "ARRAY", "items", Map.of("type", "STRING")));
         questionItemProps.put("correctIndex", Map.of("type", "INTEGER"));
         questionItemProps.put("explanation", Map.of("type", "STRING"));
+        questionItemProps.put("optionExplanations", Map.of("type", "ARRAY", "items", Map.of("type", "STRING")));
         questionItemProps.put("memoryHook", Map.of("type", "STRING"));
 
         Map<String, Object> questionsSchema = new LinkedHashMap<>();
@@ -200,7 +202,7 @@ public class GeminiService {
         questionsSchema.put("items", Map.of(
                 "type", "OBJECT",
                 "properties", questionItemProps,
-                "required", List.of("question", "options", "correctIndex", "explanation", "memoryHook")
+                "required", List.of("question", "options", "correctIndex", "explanation", "optionExplanations", "memoryHook")
         ));
 
         Map<String, Object> schemaProps = new LinkedHashMap<>();
@@ -236,11 +238,20 @@ public class GeminiService {
                     }
                 }
 
+                List<String> optionExplanations = new ArrayList<>();
+                JsonNode optExpNode = qNode.path("optionExplanations");
+                if (optExpNode.isArray()) {
+                    for (JsonNode exp : optExpNode) {
+                        optionExplanations.add(exp.asText());
+                    }
+                }
+
                 QuestionItem item = QuestionItem.builder()
                         .question(qNode.path("question").asText(""))
                         .options(options)
                         .correctIndex(qNode.path("correctIndex").asInt(0))
                         .explanation(qNode.path("explanation").asText(""))
+                        .optionExplanations(optionExplanations)
                         .memoryHook(qNode.path("memoryHook").asText(""))
                         .build();
 
