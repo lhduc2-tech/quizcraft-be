@@ -65,4 +65,33 @@ public class AuthController {
                 "googleClientId", googleClientId != null ? googleClientId.trim() : ""
         ));
     }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Map<String, Object>> deleteCurrentAccount(
+            @AuthenticationPrincipal UserPrincipal principal,
+            HttpServletRequest request
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+        authService.softDeleteUser(principal.getId(), token);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã xóa mềm tài khoản thành công. Tài khoản này sẽ không thể đăng nhập được nữa."
+        ));
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Map<String, Object>> softDeleteUserById(
+            @PathVariable("id") Long id,
+            HttpServletRequest request
+    ) {
+        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+        authService.softDeleteUser(id, token);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã xóa mềm tài khoản ID " + id + " thành công."
+        ));
+    }
 }

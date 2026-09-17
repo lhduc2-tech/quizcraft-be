@@ -20,6 +20,7 @@ public class UserResponse {
     private String fullName;
     private String avatarUrl;
     private String authProvider;
+    private Integer isDeleted;
     private LocalDateTime createdAt;
 
     public static UserResponse fromEntity(User user) {
@@ -31,6 +32,7 @@ public class UserResponse {
                 .fullName(user.getFullName())
                 .avatarUrl(user.getAvatarUrl())
                 .authProvider(user.getAuthProvider())
+                .isDeleted(user.getIsDeleted() != null ? user.getIsDeleted() : 0)
                 .createdAt(user.getCreatedAt())
                 .build();
     }

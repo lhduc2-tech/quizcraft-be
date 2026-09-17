@@ -42,6 +42,10 @@ public class User {
     @Column(name = "google_id", length = 100)
     private String googleId;
 
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "integer default 0")
+    @Builder.Default
+    private Integer isDeleted = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -52,6 +56,9 @@ public class User {
         }
         if (authProvider == null) {
             authProvider = "LOCAL";
+        }
+        if (isDeleted == null) {
+            isDeleted = 0;
         }
     }
 }

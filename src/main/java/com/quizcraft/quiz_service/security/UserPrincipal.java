@@ -23,6 +23,7 @@ public class UserPrincipal implements UserDetails {
     private String fullName;
     private String avatarUrl;
     private String authProvider;
+    private Integer isDeleted;
 
     public static UserPrincipal create(User user) {
         return UserPrincipal.builder()
@@ -33,6 +34,7 @@ public class UserPrincipal implements UserDetails {
                 .fullName(user.getFullName())
                 .avatarUrl(user.getAvatarUrl())
                 .authProvider(user.getAuthProvider())
+                .isDeleted(user.getIsDeleted() != null ? user.getIsDeleted() : 0)
                 .build();
     }
 
@@ -58,7 +60,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isDeleted == null || isDeleted == 0;
     }
 
     @Override
@@ -68,6 +70,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isDeleted == null || isDeleted == 0;
     }
 }

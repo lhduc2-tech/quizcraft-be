@@ -81,6 +81,10 @@ public class AuthService {
                 .or(() -> userRepository.findByEmail(usernameOrEmail.toLowerCase()))
                 .orElseThrow(() -> new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không chính xác!"));
 
+        if (user.getIsDeleted() != null && user.getIsDeleted() == 1) {
+            throw new BadCredentialsException("Tài khoản này đã bị xóa hoặc vô hiệu hóa!");
+        }
+
         if (user.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không chính xác!");
         }
@@ -130,6 +134,10 @@ public class AuthService {
                     .or(() -> userRepository.findByEmail(email.toLowerCase()))
                     .orElse(null);
 
+            if (user != null && user.getIsDeleted() != null && user.getIsDeleted() == 1) {
+                throw new IllegalArgumentException("Tài khoản này đã bị xóa hoặc vô hiệu hóa!");
+            }
+
             if (user == null) {
                 // Create new Google User
                 String baseUsername = email.split("@")[0].replaceAll("[^a-zA-Z0-9_]", "");
@@ -147,6 +155,7 @@ public class AuthService {
                         .avatarUrl(picture)
                         .authProvider("GOOGLE")
                         .googleId(googleId)
+                        .isDeleted(0)
                         .build();
 
                 user = userRepository.save(user);
@@ -191,6 +200,20 @@ public class AuthService {
         if (token != null && !token.trim().isEmpty()) {
             long remainingSeconds = tokenProvider.getRemainingSeconds(token);
             redisBlacklistService.blacklistToken(token, remainingSeconds);
+        }
+    }
+
+    @Transactional
+    public void softDeleteUser(Long userId, String token) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userId));
+
+        user.setIsDeleted(1);
+        userRepository.save(user);
+        log.info("Soft deleted user: id={}, username={}", user.getId(), user.getUsername());
+
+        if (token != null && !token.trim().isEmpty()) {
+            logout(token);
         }
     }
 
