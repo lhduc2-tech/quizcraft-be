@@ -1,0 +1,15 @@
+target/
+.git/
+.gitignore
+*.md
+.gemini/
+.agents/
+brain/
+tmp/
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+bin/
+obj/
