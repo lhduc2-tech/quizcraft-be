@@ -52,8 +52,8 @@ public class SecurityConfig {
                         // Public authentication endpoints
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/google", "/api/auth/config").permitAll()
 
-                        // Allow quiz generation and guest limit check for both guests and members
-                        .requestMatchers("/api/quiz/generate", "/api/quiz/guest-limit").permitAll()
+                        // Allow quiz generation, guest limit check, and health check for both guests and members
+                        .requestMatchers("/api/quiz/generate", "/api/quiz/guest-limit", "/api/health").permitAll()
                         .requestMatchers("/error").permitAll()
 
                         // User profile, logout & account deletion require token
